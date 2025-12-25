@@ -26,10 +26,11 @@ on:
 
 env:
   INPUT_PYTHON_VERSION: 3.11
-  INPUT_USERNAME: gpustack
-  INPUT_PASSWORD: ${{ secrets.CI_DOCKERHUB_PASSWORD }}
-  INPUT_NAMESPACE: gpustack
-  INPUT_REPOSITORY: runtime
+  INPUT_REGISTRY: swr.cn-east-3.myhuaweicloud.com
+  INPUT_USERNAME: ${{ secrets.CI_SWR_USERNAME }}
+  INPUT_PASSWORD: ${{ secrets.CI_SWR_PASSWORD }}
+  INPUT_NAMESPACE: cloud-mdgx
+  INPUT_REPOSITORY: seabed-runtime
 
 jobs:
   pack:
@@ -79,17 +80,18 @@ jobs:
           cache-dir: ${{ github.workspace }}/.cache
           dockerfile: ${{ github.workspace }}/pack/Dockerfile
           skip-extraction: ${{ steps.setup-buildx-cache.outputs.cache-hit }}
-      - name: Login DockerHub
+      - name: Login Huawei Cloud SWR
         if: ${{ github.event_name != 'pull_request' }}
         uses: docker/login-action@v3
         with:
+          registry: ${{ env.INPUT_REGISTRY }}
           username: ${{ env.INPUT_USERNAME }}
           password: ${{ env.INPUT_PASSWORD }}
       - name: Get Metadata
         id: metadata
         uses: docker/metadata-action@v5
         with:
-          images: "${{ env.INPUT_NAMESPACE }}/${{ env.INPUT_REPOSITORY }}"
+          images: "${{ env.INPUT_REGISTRY }}/${{ env.INPUT_NAMESPACE }}/${{ env.INPUT_REPOSITORY }}"
       - name: Get Image Labels
         run: |
           #!/usr/bin/env bash
@@ -127,6 +129,6 @@ jobs:
           labels: |
             ${{ steps.metadata.outputs.labels }}
           cache-from: |
-            type=registry,ref=${{ env.INPUT_NAMESPACE }}/${{ env.INPUT_REPOSITORY }}:build-cache
+            type=registry,ref=${{ env.INPUT_REGISTRY }}/${{ env.INPUT_NAMESPACE }}/${{ env.INPUT_REPOSITORY }}:build-cache
           cache-to: |
-            ${{ github.event_name != 'pull_request' && format('type=registry,mode=max,compression=gzip,ref={0}/{1}:build-cache,ignore-error=true', env.INPUT_NAMESPACE, env.INPUT_REPOSITORY) || '' }}
+            ${{ github.event_name != 'pull_request' && format('type=registry,mode=max,compression=gzip,ref={0}/{1}/{2}:build-cache,ignore-error=true', env.INPUT_REGISTRY, env.INPUT_NAMESPACE, env.INPUT_REPOSITORY) || '' }}
