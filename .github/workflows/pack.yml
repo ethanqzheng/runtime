@@ -24,7 +24,7 @@ env:
 
 jobs:
   pack:
-    runs-on: self-hosted
+    runs-on: ubuntu-22.04
     timeout-minutes: 360
     steps:
       - name: Checkout
@@ -105,8 +105,8 @@ jobs:
           ulimit: |
             nofile=65536:65536
           shm-size: "16G"
-          provenance: true
-          sbom: true
+          provenance: false
+          sbom: false
           push: ${{ github.event_name != 'pull_request' }}
           file: ${{ github.workspace }}/pack/Dockerfile
           context: ${{ github.workspace }}
