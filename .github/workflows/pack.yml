@@ -13,16 +13,6 @@ defaults:
 
 on:
   workflow_dispatch: {}
-  push:
-    branches:
-      - "main"
-      - "v*-dev"
-    tags:
-      - "v*.*.*"
-  pull_request:
-    branches:
-      - "main"
-      - "v*-dev"
 
 env:
   INPUT_PYTHON_VERSION: 3.11
@@ -34,7 +24,7 @@ env:
 
 jobs:
   pack:
-    runs-on: ubuntu-22.04
+    runs-on: self-hosted
     timeout-minutes: 360
     steps:
       - name: Checkout
